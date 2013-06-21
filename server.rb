@@ -1,11 +1,9 @@
 require 'rubygems'
 require 'bundler/setup'
-
 require 'sinatra'
-require 'curb'
+require 'httparty'
 
 class App < Sinatra::Base
-
   set :apikey, 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
   set :courier, 'jne'
   set :format, 'json'
@@ -20,17 +18,18 @@ class App < Sinatra::Base
     params = request.env['rack.request.query_hash']
     query = params['query']
     type = params['type']
-
     url = 'http://api.ongkir.info/city/list'
-    c = Curl::Easy.http_post(url,
-                            Curl::PostField.content('query', query),
-                            Curl::PostField.content('type', type),
-                            Curl::PostField.content('courier', settings.courier),
-                            Curl::PostField.content('API-Key', settings.apikey),
-                            Curl::PostField.content('format', settings.format))
 
-    c.body_str
-
+    options = { :body => {
+        "query" => query,
+        "type" => type,
+        "courier" => settings.courier,
+        "API-Key" => settings.apikey,
+        "format" => settings.format
+      }
+    }
+    response = HTTParty.post(url, options)
+    response.body
   end
 
   get '/cost' do
@@ -40,18 +39,18 @@ class App < Sinatra::Base
     from = params['from']
     to = params['to']
     weight = params['weight']
+    url = 'http://api.ongkir.info/cost/find'
 
-    url = 'http://api.ongkir.info/cost/find' 
-    c = Curl::Easy.http_post(url,
-                            Curl::PostField.content('from', from),
-                            Curl::PostField.content('to', to),
-                            Curl::PostField.content('weight', weight),
-                            Curl::PostField.content('courier', settings.courier),
-                            Curl::PostField.content('API-Key', settings.apikey),
-                            Curl::PostField.content('format', settings.format))
-  
-    c.body_str
-
+    options = { :body => {
+        "from" => from,
+        "to" => to,
+        "weight" => weight,
+        "courier" => settings.courier,
+        "API-Key" => settings.apikey,
+        "format" => settings.format
+      }
+    }
+    response = HTTParty.post(url, options)
+    response.body
   end
-
 end
